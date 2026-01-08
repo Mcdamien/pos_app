@@ -1,0 +1,90 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Represents a physical or logical location for inventory
+model Location {
+  id          String @id @default(cuid())
+  name        String @unique // e.g., "Main Warehouse", "Downtown Shop"
+  description String?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  StockLevels StockLevel[]
+  SaleItems   SaleItem[] // Tracks which location a sale was made from
+
+  @@map("locations")
+}
+
+model Product {
+  id        String   @id @default(cuid())
+  sku       String   @unique
+  name      String
+  price     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  StockLevels StockLevel[]
+  SaleItems   SaleItem[]
+
+  @@map("products")
+}
+
+// A join table to track stock of a product at a specific location
+model StockLevel {
+  quantity Int @default(0)
+
+  // Relations
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  location  Location  @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  locationId String
+
+  @@id([productId, locationId]) // Composite primary key to ensure one entry per product/location
+  @@map("stock_levels")
+}
+
+model Sale {
+  id          String   @id @default(cuid())
+  totalAmount Float
+  createdAt   DateTime @default(now())
+
+  // Relations
+  SaleItems SaleItem[]
+
+  @@map("sales")
+}
+
+model SaleItem {
+  id          String @id @default(cuid())
+  quantity    Int
+  priceAtSale Float // Price at the time of sale, in case product price changes later
+
+  // Relations
+  sale     Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  saleId   String
+  product  Product  @relation(fields: [productId], references: [id])
+  productId String
+  location Location @relation(fields: [locationId], references: [id]) // The location where the sale occurred
+  locationId String
+
+  @@map("sale_items")
+}
+
+// Simple model for the Accounting page
+model Expense {
+  id          String   @id @default(cuid())
+  description String
+  amount      Float
+  createdAt   DateTime @default(now())
+
+  @@map("expenses")
+}
