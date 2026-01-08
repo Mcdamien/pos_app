@@ -1,4 +1,7 @@
 // src/app/dashboard/_components/inventory-page.tsx
+
+// 1. Import the types from Prisma
+import { StockLevel, Product } from "@prisma/client"; 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getStockForLocation } from "@/lib/actions";
@@ -8,7 +11,8 @@ interface InventoryPageProps {
 }
 
 export default async function InventoryPage({ locationName }: InventoryPageProps) {
-  const inventory = await getStockForLocation(locationName);
+  // 2. Explicitly type the 'inventory' variable
+  const inventory: (StockLevel & { product: Product })[] = await getStockForLocation(locationName);
 
   return (
     <Card>
@@ -26,6 +30,7 @@ export default async function InventoryPage({ locationName }: InventoryPageProps
             </TableRow>
           </TableHeader>
           <TableBody>
+            {/* The 'item' here is now correctly typed, and the error is gone */}
             {inventory.map((item) => (
               <TableRow key={item.productId}>
                 <TableCell className="font-medium">{item.product.sku}</TableCell>
