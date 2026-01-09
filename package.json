@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev && sleep 3 && open http://localhost:3000/dashboard",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "db-seed": "tsx prisma/seed.ts",
-    "postinstall": "prisma generate"
+    
   },
   "dependencies": {
     "@prisma/client": "^6.19.1",
