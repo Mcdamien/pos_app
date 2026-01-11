@@ -7,14 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { getLocations, getStockForLocation } from '@/lib/actions';
 import { Location, Product } from '@prisma/client';
 import { Loader2 } from 'lucide-react';
-
-interface StockLevelWithProduct {
-  id: string;
-  productId: string;
-  locationId: string;
-  quantity: number;
-  product: Product;
-}
+import { StockLevelWithProduct } from '@/types';
 
 export function InventoryView() {
   const [locations, setLocations] = useState<Location[]>([]);
@@ -96,7 +89,7 @@ export function InventoryView() {
             </TableHeader>
             <TableBody>
               {inventory.map((item) => (
-                <TableRow key={item.id}>
+                <TableRow key={item.productId}>
                   <TableCell className="font-mono">{item.product.sku}</TableCell>
                   <TableCell>{item.product.name}</TableCell>
                   <TableCell>{item.product.uom}</TableCell>

@@ -12,10 +12,11 @@ import { ReceiveInventoryForm } from '@/components/inventory/receive-inventory-f
 import { PackagePlus } from 'lucide-react';
 import { useShop } from '@/context/ShopContext';
 import { ShopSelector } from '@/components/shop-selector';
+import { StockLevelWithProduct } from '@/types';
 
 export default function ShopPage() {
   const { selectedShopId, shops: locations } = useShop();
-  const [inventory, setInventory] = useState<(StockLevel & { product: Product })[]>([]);
+  const [inventory, setInventory] = useState<StockLevelWithProduct[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false);
 
@@ -95,7 +96,7 @@ export default function ShopPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  inventory.map((item: StockLevel & { product: Product }) => (
+                  inventory.map((item: StockLevelWithProduct) => (
                     <TableRow key={item.productId}>
                       <TableCell className="font-medium">{item.product.sku}</TableCell>
                       <TableCell>{item.product.name}</TableCell>

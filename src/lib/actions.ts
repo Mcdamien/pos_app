@@ -31,10 +31,19 @@ export async function getLocations(): Promise<Location[]> {
 }
 
 export async function getStockForLocation(locationId: string) {
-  return await prisma.stockLevel.findMany({
+  const stock = await prisma.stockLevel.findMany({
     where: { locationId },
     include: { product: true },
   });
+
+  return stock.map(item => ({
+    ...item,
+    product: {
+      ...item.product,
+      cost: item.product.cost.toString(),
+      price: item.product.price.toString(),
+    }
+  }));
 }
 
 export async function getLocationById(id: string): Promise<Location | null> {
@@ -207,13 +216,19 @@ export async function getProductsWithWarehouseQuantity() {
 
   if (!warehouse) {
     // If no warehouse, return products without quantity info
-    return prisma.product.findMany({ orderBy: { name: 'asc' } });
+    const products = await prisma.product.findMany({ orderBy: { name: 'asc' } });
+    return products.map(product => ({
+      ...product,
+      cost: product.cost.toString(),
+      price: product.price.toString(),
+      warehouseQuantity: 0
+    }));
   }
 
   // 2. Fetch all products and include their inventory specific to the warehouse
   const products = await prisma.product.findMany({
     include: {
-      inventory: {
+      StockLevels: {
         where: {
           locationId: warehouse.id,
         },
@@ -225,8 +240,9 @@ export async function getProductsWithWarehouseQuantity() {
   // 3. Transform the data to be easier to use on the frontend
   const transformedProducts = products.map((product) => ({
     ...product,
-    price: product.price.toString(), // Fix for Decimal serialization
-    warehouseQuantity: product.inventory.length > 0 ? product.inventory[0].quantity : 0,
+    cost: product.cost.toString(),
+    price: product.price.toString(),
+    warehouseQuantity: product.StockLevels.length > 0 ? product.StockLevels[0].quantity : 0,
   }));
 
   return transformedProducts;

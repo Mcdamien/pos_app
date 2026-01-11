@@ -7,14 +7,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Product } from '@prisma/client';
-import { getProducts, createProduct, updateProduct, deleteProduct } from '@/lib/actions';
+import { getProducts, createProduct, updateProduct, deleteProduct, getProductsWithWarehouseQuantity } from '@/lib/actions';
 import { Plus, ArrowLeftRight, PackagePlus } from 'lucide-react';
 import { ShopSelector } from '@/components/shop-selector';
 import { useShop } from '@/context/ShopContext';
 import { ReceiveInventoryForm } from '@/components/inventory/receive-inventory-form';
+import { ProductWithInventory } from '@/types';
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductWithInventory[]>([]);
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isReceiveOpen, setIsReceiveOpen] = useState(false);
@@ -32,7 +33,7 @@ export default function ProductsPage() {
   };
 
   const fetchProducts = async () => {
-    const data = await getProducts();
+    const data = await getProductsWithWarehouseQuantity();
     setProducts(data);
   };
 
@@ -95,6 +96,11 @@ export default function ProductsPage() {
     resetForm();
     setFormData(prev => ({ ...prev, sku: generateSKU() }));
     setIsOpen(true);
+  };
+
+  type ProductWithStringPrice = Omit<Product, 'price' | 'cost'> & {
+    price: string;
+    cost: string;
   };
 
   return (

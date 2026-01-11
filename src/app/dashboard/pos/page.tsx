@@ -9,13 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
 import { Product, Location, StockLevel } from '@prisma/client';
 import { getProducts, getLocations, createSaleWithItems, getStockForLocation } from '@/lib/actions';
-import { CartItem } from '@/types';
+import { CartItem, ProductWithStrings } from '@/types';
 import { ShoppingCart, Minus, Plus, X } from 'lucide-react';
 import { useShop } from '@/context/ShopContext';
 import { ShopSelector } from '@/components/shop-selector';
 
 export default function POSTerminalPage() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductWithStrings[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const { selectedShopId: selectedLocationId, shops: locations } = useShop();
   const [stockLevels, setStockLevels] = useState<Record<string, number>>({});
@@ -51,7 +51,7 @@ export default function POSTerminalPage() {
     );
   }, [products, searchQuery]);
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: ProductWithStrings) => {
     const available = stockLevels[product.id] || 0;
     const inCart = cart.find(item => item.id === product.id)?.quantity || 0;
 
