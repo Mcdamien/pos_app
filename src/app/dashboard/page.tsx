@@ -6,11 +6,13 @@ async function getDashboardStats() {
   const totalSales = await prisma.sale.aggregate({ _sum: { totalAmount: true } });
   const totalProducts = await prisma.product.count();
   const lowStockItems = await prisma.stockLevel.count({
-    where: { quantity: { lt: 5 }, location: { name: 'Downtown Shop' } },
+    where: { quantity: { lt: 5 } },
   });
-  const totalExpenses = (await prisma.expense.aggregate({ _sum: { amount: true } }))._sum.amount || 0;
-  const revenue = totalSales._sum.totalAmount || 0;
-  const profit = revenue - totalExpenses;
+  const totalExpensesSum = await prisma.expense.aggregate({ _sum: { amount: true } });
+  
+  const revenue = Number(totalSales._sum.totalAmount || 0);
+  const expenses = Number(totalExpensesSum._sum.amount || 0);
+  const profit = revenue - expenses;
 
   return { revenue, totalProducts, lowStockItems, profit };
 }

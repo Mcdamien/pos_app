@@ -4,15 +4,17 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const locations = [
-  { name: 'Main Warehouse', description: 'Primary storage facility' },
-  { name: 'Downtown Shop', description: 'Main retail storefront' },
+  { name: 'Pharmacy Shop', description: 'Pharmacy retail location' },
+  { name: 'SuperMart', description: 'Supermarket retail location' },
+  { name: 'Warehouse', description: 'Central warehouse for stock distribution' },
 ];
 
 const products = [
-  { sku: 'LAPTOP-001', name: 'ProBook Laptop 15"', price: 1299.99 },
-  { sku: 'MOUSE-002', name: 'Wireless Mouse', price: 25.50 },
-  { sku: 'KEY-003', name: 'Mechanical Keyboard', price: 75.00 },
-  { sku: 'MON-004', name: '4K Monitor 27"', price: 350.00 },
+  { sku: 'LAPTOP-001', name: 'ProBook Laptop 15"', cost: 800.00, price: 1299.99, uom: 'pcs' },
+  { sku: 'MOUSE-002', name: 'Wireless Mouse', cost: 10.00, price: 25.50, uom: 'pcs' },
+  { sku: 'KEY-003', name: 'Mechanical Keyboard', cost: 40.00, price: 75.00, uom: 'pcs' },
+  { sku: 'MON-004', name: '4K Monitor 27"', cost: 200.00, price: 350.00, uom: 'pcs' },
+  { sku: 'CABLE-005', name: 'HDMI Cable 2m', cost: 5.00, price: 15.00, uom: 'pcs' },
 ];
 
 async function main() {
@@ -20,34 +22,38 @@ async function main() {
 
   // Create locations
   for (const loc of locations) {
-    await prisma.location.upsert({ where: { name: loc.name }, update: {}, create: loc });
+    await prisma.location.upsert({ 
+      where: { name: loc.name }, 
+      update: {}, 
+      create: loc 
+    });
   }
 
   // Create products
   for (const prod of products) {
-    await prisma.product.upsert({ where: { sku: prod.sku }, update: {}, create: prod });
+    await prisma.product.upsert({ 
+      where: { sku: prod.sku }, 
+      update: {
+        cost: prod.cost,
+        price: prod.price,
+        uom: prod.uom
+      }, 
+      create: prod 
+    });
   }
 
-  // Get created entities to link them
-  const warehouse = await prisma.location.findUnique({ where: { name: 'Main Warehouse' } });
-  const shop = await prisma.location.findUnique({ where: { name: 'Downtown Shop' } });
+  // Use findUniqueOrThrow - available and preferred in Prisma 6 for seeds
+  const warehouse = await prisma.location.findUniqueOrThrow({ where: { name: 'Warehouse' } });
   const allProducts = await prisma.product.findMany();
 
-  if (warehouse && shop && allProducts.length > 0) {
-    // Seed stock levels for each product at each location
-    for (const product of allProducts) {
-      await prisma.stockLevel.upsert({
-        where: { productId_locationId: { productId: product.id, locationId: warehouse.id } },
-        update: { quantity: 100 }, // Keep warehouse well-stocked
-        create: { productId: product.id, locationId: warehouse.id, quantity: 100 },
-      });
-
-      await prisma.stockLevel.upsert({
-        where: { productId_locationId: { productId: product.id, locationId: shop.id } },
-        update: { quantity: 10 }, // Less stock in the shop
-        create: { productId: product.id, locationId: shop.id, quantity: 10 },
-      });
-    }
+  // Seed stock levels
+  for (const product of allProducts) {
+    // Warehouse stock: 200 units each as requested
+    await prisma.stockLevel.upsert({
+      where: { productId_locationId: { productId: product.id, locationId: warehouse.id } },
+      update: { quantity: 200 },
+      create: { productId: product.id, locationId: warehouse.id, quantity: 200 },
+    });
   }
 
   console.log('Seeding finished.');

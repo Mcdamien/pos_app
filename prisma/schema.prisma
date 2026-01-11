@@ -12,7 +12,7 @@ datasource db {
 // Represents a physical or logical location for inventory
 model Location {
   id          String @id @default(cuid())
-  name        String @unique // e.g., "Main Warehouse", "Downtown Shop"
+  name        String @unique // e.g., "Warehouse", "Pharmacy Shop"
   description String?
   createdAt   DateTime @default(now())
 
@@ -27,7 +27,9 @@ model Product {
   id        String   @id @default(cuid())
   sku       String   @unique
   name      String
-  price     Float
+  cost      Decimal  @db.Decimal(10, 2) @default(0.00)
+  price     Decimal  @db.Decimal(10, 2)
+  uom       String   @default("Unit") // Measure of Unit (MoU)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -54,7 +56,7 @@ model StockLevel {
 
 model Sale {
   id          String   @id @default(cuid())
-  totalAmount Float
+  totalAmount Decimal  @db.Decimal(10, 2)
   createdAt   DateTime @default(now())
 
   // Relations
@@ -66,7 +68,7 @@ model Sale {
 model SaleItem {
   id          String @id @default(cuid())
   quantity    Int
-  priceAtSale Float // Price at the time of sale, in case product price changes later
+  priceAtSale Decimal @db.Decimal(10, 2) // Price at the time of sale
 
   // Relations
   sale     Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
@@ -83,7 +85,7 @@ model SaleItem {
 model Expense {
   id          String   @id @default(cuid())
   description String
-  amount      Float
+  amount      Decimal  @db.Decimal(10, 2)
   createdAt   DateTime @default(now())
 
   @@map("expenses")

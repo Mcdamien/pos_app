@@ -9,12 +9,13 @@ import {
   Package,
   Store,
   Receipt,
-  Calculator
+  Calculator,
+  PlusCircle
 } from "lucide-react";
 
 const items = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { title: "Warehouse Inventory", href: "/dashboard/warehouse", icon: Package },
+  { title: "Products", href: "/dashboard/products", icon: PlusCircle },
   { title: "Shop Inventory", href: "/dashboard/shop", icon: Store },
   { title: "POS Terminal", href: "/dashboard/pos", icon: Receipt },
   { title: "Accounting", href: "/dashboard/accounting", icon: Calculator },
@@ -27,7 +28,7 @@ export function Sidebar() {
     <div className="flex h-full max-h-screen flex-col gap-2">
       <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-          <span className="">YCW POS App</span>
+          <span className="">Yames POS</span>
         </Link>
       </div>
       <div className="flex-1">

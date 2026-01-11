@@ -2,13 +2,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getSales, getExpenses } from "@/lib/actions";
+import { ExpenseForm } from "./_components/expense-form";
 
 export default async function AccountingPage() {
   const sales = await getSales();
   const expenses = await getExpenses();
 
-  const totalRevenue = sales.reduce((sum, sale) => sum + sale.totalAmount, 0);
-  const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const totalRevenue = sales.reduce((sum, sale) => sum + Number(sale.totalAmount), 0);
+  const totalExpenses = expenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
   const profit = totalRevenue - totalExpenses;
 
   return (
@@ -42,41 +43,63 @@ export default async function AccountingPage() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Sales</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Sale ID</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Items</TableHead>
-                <TableHead className="text-right">Total</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sales.map((sale) => (
-                <TableRow key={sale.id}>
-                  <TableCell className="font-medium">{sale.id.slice(0, 8)}...</TableCell>
-                  <TableCell>{new Date(sale.createdAt).toLocaleString()}</TableCell>
-                  <TableCell>
-                    <ul className="text-sm">
-                      {sale.SaleItems.map((item) => (
-                        <li key={item.id}>{item.quantity}x {item.product.name}</li>
-                      ))}
-                    </ul>
-                  </TableCell>
-                  <TableCell className="text-right font-semibold">
-                    ${sale.totalAmount.toFixed(2)}
-                  </TableCell>
+      <ExpenseForm />
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Sales</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              </TableHeader>
+              <TableBody>
+                {sales.map((sale) => (
+                  <TableRow key={sale.id}>
+                    <TableCell className="text-xs">
+                      {new Date(sale.createdAt).toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">
+                      ${Number(sale.totalAmount).toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Expenses</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Description</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {expenses.map((exp) => (
+                  <TableRow key={exp.id}>
+                    <TableCell>{exp.description}</TableCell>
+                    <TableCell className="text-right text-red-600 font-semibold">
+                      -${Number(exp.amount).toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
