@@ -4,10 +4,10 @@ import { prisma } from './prisma';
 import { Product, Location, Prisma } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { revalidatePath } from 'next/cache';
-import { CartItem } from '@/types';
+import { CartItem, ProductWithStrings, ProductWithInventory, StockLevelWithProduct } from '@/types';
 
 // --- GETTERS ---
-export async function getProducts() {
+export async function getProducts(): Promise<ProductWithStrings[]> {
   const products = await prisma.product.findMany({
     orderBy: { name: 'asc' }
   });
@@ -30,7 +30,7 @@ export async function getLocations(): Promise<Location[]> {
   return await prisma.location.findMany({ orderBy: { name: 'asc' } });
 }
 
-export async function getStockForLocation(locationId: string) {
+export async function getStockForLocation(locationId: string): Promise<StockLevelWithProduct[]> {
   const stock = await prisma.stockLevel.findMany({
     where: { locationId },
     include: { product: true },
@@ -181,7 +181,7 @@ export async function addStockToWarehouse(productId: string, quantityToAdd: numb
   }
 
   // 2. Use upsert to either update existing inventory or create a new record
-  await prisma.inventory.upsert({
+  await prisma.stockLevel.upsert({
     where: {
       productId_locationId: {
         productId: productId,
@@ -208,7 +208,7 @@ export async function addStockToWarehouse(productId: string, quantityToAdd: numb
 
 // ... your other actions
 
-export async function getProductsWithWarehouseQuantity() {
+export async function getProductsWithWarehouseQuantity(): Promise<ProductWithInventory[]> {
   // 1. Find the warehouse ID
   const warehouse = await prisma.location.findUnique({
     where: { name: 'Warehouse' },

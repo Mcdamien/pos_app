@@ -1,8 +1,14 @@
 import { Product, StockLevel } from '@prisma/client';
 
-export interface ProductWithStrings extends Omit<Product, 'cost' | 'price'> {
+export interface ProductWithStrings {
+  id: string;
+  name: string;
+  sku: string;
   cost: string;
   price: string;
+  uom: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface ProductWithInventory extends ProductWithStrings {

@@ -1,9 +1,10 @@
 // src/app/dashboard/_components/inventory-page.tsx
 
-import { StockLevel, Product } from "@prisma/client"; 
+import { StockLevel } from "@prisma/client"; 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getStockForLocation } from "@/lib/actions";
+import { StockLevelWithProduct } from "@/types";
 
 interface InventoryPageProps {
   locationId: string;
@@ -11,7 +12,7 @@ interface InventoryPageProps {
 }
 
 export default async function InventoryPage({ locationId, locationName }: InventoryPageProps) {
-  const inventory: (StockLevel & { product: Product })[] = await getStockForLocation(locationId);
+  const inventory: StockLevelWithProduct[] = await getStockForLocation(locationId);
 
   return (
     <Card>
@@ -38,7 +39,7 @@ export default async function InventoryPage({ locationId, locationName }: Invent
                 </TableCell>
               </TableRow>
             ) : (
-              inventory.map((item: StockLevel & { product: Product }) => (
+              inventory.map((item: StockLevelWithProduct) => (
                 <TableRow key={item.productId}>
                   <TableCell className="font-medium">{item.product.sku}</TableCell>
                   <TableCell>{item.product.name}</TableCell>
